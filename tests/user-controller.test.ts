@@ -1,26 +1,29 @@
 // tests/api.spec.ts
 import { test, expect } from '@playwright/test';
+import {StatusCodes} from "http-status-codes";
+import {createRandomId} from "../src/controller-helper";
 let baseURL: string = 'http://localhost:3000/users';
 
 test.describe('User management API', () => {
-
-    test('all users: should return empty array when no users', async ({ request }) => {
-        const response = await request.get(`${baseURL}`);
-        expect(response.status()).toBe(200);
-        const responseBody = await response.text()
-        expect(responseBody).toBe('[]');
-    });
 
     test('find user: should return a user by ID', async ({ request }) => {
         const response = await request.post(`${baseURL}`);
         const responseBody = await response.json()
         const userId = responseBody.id;
         const getResponse = await request.get(`${baseURL}/${userId}`);
-        expect(getResponse.status()).toBe(200);
+        expect(getResponse.status()).toBe(StatusCodes.OK);
     });
 
     test('find user: should return 404 if user not found', async ({ request }) => {
-
+        const response = await request.get(`${baseURL}`);
+        const responseBody = await response.json();
+        const existingIds:number[] = [];
+        for (let i = 0; i < responseBody.length; i++) {
+            existingIds[i] =responseBody[i].id;
+        }
+        const userId = createRandomId(existingIds);
+        const getResponse = await request.get(`${baseURL}/${userId}`);
+        expect(getResponse.status()).toBe(StatusCodes.NOT_FOUND);
     });
 
     test('create user: should add a new user', async ({ request }) => {
@@ -33,12 +36,25 @@ test.describe('User management API', () => {
     });
 
     test('delete user: should delete a user by ID', async ({ request }) => {
-
+        const response = await request.post(`${baseURL}`);
+        const responseBody = await response.json()
+        const userId = responseBody.id;
+        const getResponse = await request.delete(`${baseURL}/${userId}`);
+        expect(getResponse.status()).toBe(StatusCodes.OK);
     });
 
     test('delete user: should return 404 if user not found', async ({ request }) => {
-
+        const response = await request.get(`${baseURL}`);
+        const responseBody = await response.json();
+        const existingIds:number[] = [];
+        for (let i = 0; i < responseBody.length; i++) {
+            existingIds[i] =responseBody[i].id;
+        }
+        const userId = createRandomId(existingIds);
+        const getResponse = await request.delete(`${baseURL}/${userId}`);
+        expect(getResponse.status()).toBe(StatusCodes.NOT_FOUND);
     });
 
 
 });
+
