@@ -3,6 +3,8 @@ import { test, expect } from '@playwright/test';
 import {StatusCodes} from "http-status-codes";
 import {createRandomId} from "../src/controller-helper";
 let baseURL: string = 'http://localhost:3000/users';
+let numberOfObjects:number;
+let userIDs:number[]=[];
 
 test.describe('User management API', () => {
 
@@ -56,5 +58,25 @@ test.describe('User management API', () => {
     });
 
 
-});
+    test('GET user id information', async ({ request }) => {
+        await request.post(`${baseURL}`);
+        await request.post(`${baseURL}`);
+        //request to get all users
+        const responseAllUsers = await request.get(`${baseURL}`);
+        const responseUsers = await responseAllUsers.json();
+        numberOfObjects = responseUsers.length;
+        console.log('numberOfObjects',numberOfObjects);
+        //userID array
+        for (let i = 0; i < numberOfObjects; i++) {
+            let userId=responseUsers[i].id;
+            userIDs.push(userId)
+        }
+        console.log('userIDs',userIDs);
+    });
 
+    test('DELETE all user id information', async ({ request }) => {
+        for (let i = 0; i < numberOfObjects; i++) {
+            await request.delete(`${baseURL}/${userIDs[i]}`);
+        }
+    });
+});
