@@ -30,5 +30,8 @@ jobs:
             compose-file: ./docker-compose.yaml
             up-flags: -d
 
-      - name: Run tests
-        run: npx playwright test
+      - name: Run should return empty array when no users
+        run: npx playwright test tests/user-controller-empty-user.test.ts
+
+      - name: Run remaining tests
+        run: npx playwright test tests/user-controller.test.ts
